@@ -1,6 +1,6 @@
-# spec-tdd-review-kit
+# ai-lab
 
-A portable set of **rules, skills and subagents** that make an AI coding assistant work the way a careful team does: ask first, write a spec, split it into tasks, test first, review, commit small, and write down what was learned.
+My AI engineering lab: a portable set of **rules, skills and subagents** that make an AI coding assistant work the way a careful team does, following a spec → TDD → review workflow: ask first, write a spec, split it into tasks, test first, review, commit small, and write down what was learned.
 
 It works with **Cursor** and **Claude Code**. The kit is generic; everything specific to one company (repos, test commands, tracker, API client, feature flags) lives in a separate **company pack**. A fictional one is in [`examples/company-pack/`](examples/company-pack/README.md).
 
@@ -57,7 +57,7 @@ AGENTS.md                the entry point for assistants working in this repo
 Requires Node 18+. No dependencies.
 
 ```bash
-git clone <this repo> && cd spec-tdd-review-kit
+git clone <this repo> && cd ai-lab
 
 # preview first, nothing is changed
 node scripts/install.mjs --target cursor --dry-run
