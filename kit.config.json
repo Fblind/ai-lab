@@ -1,0 +1,28 @@
+{
+  "docsRoot": "docs",
+  "secondBrain": "~/second-brain",
+  "ticketPattern": "PROJ-\\d+",
+  "skipRedGreen": [],
+  "noCoverageRepos": [],
+  "targets": {
+    "cursor": {
+      "home": "~/.cursor",
+      "agents": "agents",
+      "skills": "skills",
+      "rules": "rules",
+      "ruleExtension": ".mdc"
+    },
+    "claude": {
+      "home": "~/.claude",
+      "agents": "agents",
+      "skills": "skills",
+      "rules": "rules",
+      "ruleExtension": ".md"
+    }
+  },
+  "sync": {
+    "source": "AGENTS.md",
+    "standards": "docs/engineering-standards.md",
+    "outputs": ["CLAUDE.md", ".cursorrules"]
+  }
+}
