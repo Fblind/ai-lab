@@ -1,0 +1,38 @@
+---
+description: Avoid repeating test cases; reuse existing tests and assertions
+globs: test/**/*.js **/*_tests.js **/tests/**/*.js
+alwaysApply: false
+---
+
+# No Redundant Tests
+
+Do not add a new test that only repeats assertions already covered by another test in the same suite.
+
+## Rules
+
+1. **Reuse default-value checks.** If a test like "should get X with default values" (or similar) already asserts default/empty values for a field, do not add a separate test that only checks that same field's default. Add the assertion to the existing test instead.
+
+2. **Prefer one test per behavior.** When adding a new behavior (e.g. a new optional field), either:
+   - Extend an existing test that already builds the same object (e.g. "default values" test) with the new default assertion, or
+   - Add a single test that covers the new behavior when the value is provided (e.g. "should include X when provided").
+
+3. **Avoid duplicate scenarios.** Before adding a test, scan the describe block for a test that already runs the same scenario (same setup, same call, same kind of outcome). If found, extend that test instead of adding a new one.
+
+## Examples
+
+```javascript
+// ❌ BAD: Redundant test — default already asserted in "should get an order with default values"
+it("should default paid to false and receipt to null when not provided", () => {
+  const order = createOrder();
+  expect(order.paid).to.be.false;
+  expect(order.receipt).to.be.null;
+});
+
+// ✅ GOOD: Defaults covered in the existing default-values test (e.g. expect(order.paid).to.be.false; expect(order.receipt).to.be.null)
+// Only add a test for the "when provided" case:
+it("should include paid and receipt when provided", () => {
+  const order = createOrder({ paid: true, receipt: { id: "x" } });
+  expect(order.paid).to.be.true;
+  expect(order.receipt).to.deep.equal({ id: "x" });
+});
+```

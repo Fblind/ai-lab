@@ -1,0 +1,29 @@
+---
+description: "Code should be self-explanatory; comments minimal and only for context, decisions, or rationale."
+alwaysApply: true
+---
+
+# Comments: self-explanatory code, minimal comments
+
+Prefer **self-explanatory code**. Keep comments **minimal**. When you add a comment, it should add **context** that the code cannot convey on its own.
+
+## Do
+
+- **Explain why or context:** business rule, non-obvious decision, workaround, or constraint (e.g. “Provider X uses a different key here because of a legacy API.”).
+- **Document decisions:** why we chose this approach, what we tried, or what we’re avoiding.
+- Use clear names, small functions, and structure so that **what** the code does is obvious from reading it.
+
+## Don’t
+
+- **Restate what the code does** (e.g. “Loop over payments” above a `forEach`).
+- Write long block comments that describe step-by-step logic; refactor so the code reads that way instead.
+- Add comments “for documentation” that don’t add context, rationale, or constraints.
+
+## Names
+
+- Name a value by what it holds, not by the role it plays in a pattern. `const {rows, error} = Queries.seatHoldRowsToAdd(...)` says more than `const decision = ...`.
+- When a function returns a result-or-error object, destructure it at the call site.
+
+## Rule of thumb
+
+If the comment only says *what* the code does, delete it and improve names/structure. If it adds *why* or *under what conditions*, keep it and keep it short.

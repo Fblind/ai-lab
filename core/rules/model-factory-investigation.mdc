@@ -1,0 +1,22 @@
+---
+description: "When a dao, repository, or data-service save drops or overwrites fields, check the model factory before changing call sites."
+alwaysApply: false
+---
+
+# Persistence layer and model factories
+
+When investigating bugs that involve a **dao**, **repository**, **data service**, or similar persistence layer, especially when fields appear to be lost, overwritten, or missing after a save, check the **related models** and the **factory** (or equivalent) that builds instances from the DB.
+
+## Why this matters
+
+- Models often use a **factory** (e.g. `createOrder`, `fromDocument`, or a method that hydrates from DB data) that defines which fields are copied from the DB into the in-memory object.
+- If a field is **not** included in that factory, it will not exist on the object when code later calls `dao.save(instance)`. A full-document save can then overwrite the stored document and effectively **drop** that field in the DB.
+- The fix is often to add the missing field(s) to the model’s factory so they are present when the object is loaded and preserved when it is saved.
+
+## What to do
+
+1. Identify which **model** (e.g. Booking, Invoice) is being loaded and saved in the suspect path.
+2. Open that model and find the **factory** (or the function that builds an instance from raw DB/API data).
+3. Check whether the fields that are “disappearing” are included in that factory; if not, add them so they are preserved on load and save.
+
+This applies to every service that uses a dao-style layer and model instances. Pair it with `fix-in-central-places`.

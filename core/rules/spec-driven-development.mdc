@@ -1,0 +1,42 @@
+---
+description: "Spec-driven development. Use when the user asks to generate a spec from a phrase, technical doc, or ticket; to implement Tn from a spec; or to review/commit after a spec task."
+globs:
+alwaysApply: false
+---
+
+# Spec-driven development
+
+Plan implementation with a **spec** (Why, What, Context, Constraints, Tasks), then run each task, review, and commit. Use the skills below for each step.
+
+## When to use this workflow
+
+- The user asks to **generate a spec** from a phrase, a technical doc path, or a ticket.
+- The user asks to **implement T1, T2, …** from a spec file (e.g. "implement T1 from docs/specs/spec-auth.md").
+- The user asks for a **code review** or **commit message** after implementing a spec task.
+
+## Skills to use
+
+| User intent | Skill |
+|-------------|--------|
+| Generate a spec (from phrase, technical doc, or ticket) | **spec-from-input** |
+| Implement task Tn from a spec | **execute-spec-task** |
+| Review code (after a task or for changed files) | **review-spec-code** |
+| Write a commit message for staged changes | **commit-spec-change** |
+| Capture what the session taught | **session-lessons** |
+
+## Flow
+
+1. **Generate spec.** The user provides a phrase, doc path, or ticket ID. Use **spec-from-input**. The spec is saved to `<docs_root>/<ticket_id>-Workflow/spec-<feature>.md` (or `<docs_root>/specs/spec-<feature>.md` if there is no ticket ID).
+2. **Review and refine.** The user edits the spec if needed.
+3. **Execute tasks.** For each T1, T2, … use **execute-spec-task** (a fresh context per task is recommended for large specs).
+4. **Review.** Use **review-spec-code** (or the `strict-code-reviewer` agent) after implementation.
+5. **Commit.** Use **commit-spec-change** to suggest a conventional commit (include the ticket ID when the work comes from a ticket).
+6. Repeat from step 3 for the next task until done; then run the **Done (Validation)** section from the spec.
+7. **Learn.** At the end of the session, run **session-lessons**.
+
+## Paths
+
+- Spec template: `docs/spec-template.md` in this kit (copy it into your workspace or point `<docs_root>` at it).
+- Generated specs: `<docs_root>/<ticket_id>-Workflow/spec-<feature>.md` or `<docs_root>/specs/spec-<feature>.md`.
+
+See also: [Spec-driven development tutorial](https://github.com/owainlewis/youtube-tutorials/tree/main/tutorials/spec-driven-development) by Owain Lewis, which inspired this flow, and `docs/philosophy.md` in this kit.

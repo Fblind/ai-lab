@@ -1,0 +1,10 @@
+---
+description: "Reuse existing code. Make the smallest change. Do not reinvent the wheel."
+alwaysApply: true
+---
+
+# Reuse what is already there
+
+Re-use the code that is already in place. Always make the smallest change. Do not reinvent the wheel.
+
+Before adding a helper, pattern, or abstraction, look for one that already does the job and extend that. A new function or file is justified only when nothing in place can take the change.

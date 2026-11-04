@@ -1,0 +1,91 @@
+---
+alwaysApply: false
+---
+
+# New project workflow (idea → discovery → requirements → plan → tasks)
+
+`/new-project-workflow` reads this file. It is not applied on its own.
+
+This workflow runs from a **roadmap ticket** (the "case") through to **engineering tasks** in the right boards. Use the subagents below at each step. The tracker is a placeholder: any tracker with documents/pages and tasks works (see `examples/company-pack/` for a concrete mapping). Where this file says "tracker document", use whatever your tracker offers; if it has none, use the local markdown files only.
+
+## When to use this workflow
+
+- The user mentions a new project starting from a roadmap ticket.
+- The user wants to go from initial ideas to validated requirements, then to an implementation plan and engineering tasks.
+
+## Steps and subagents
+
+| Step | What happens | Subagent to use |
+|------|--------------|-----------------|
+| **1** | **Start.** Everything starts from a roadmap ticket. Ask for the ticket (link or ID) and **whether the user has initial thoughts** about it (goals, constraints, ideas, concerns). Ensure you have the ticket context (read it through the tracker connector if needed). | No subagent. |
+| **2** | **Discovery and validation.** The agent summarises the context it has, asks for specific helpful context, then runs **grill-discovery** until the user confirms a shared understanding. **Outcome:** a `.md` file (problem, user journey, desired outcomes, summary of research and conversation). **Once the user approves,** a tracker document is created with that outcome (do not append the doc link to the ticket description, it breaks the format). | **project-discovery** |
+| **3** | **Requirements document.** Requirements are drafted from the discovery outcome; after validation they are added as a **new page** to the **same** tracker document (no new document). | **requirements-doc-helper** |
+| **4** | **Implementation plan.** After the user validates the requirements, a technical expert creates an implementation plan and adds it as another page to the same document. The document is then reviewed and validated. | **technical-implementation-planner** |
+| **5** | **Engineering tasks.** After the plan is validated, tasks are created in the **correct engineering board/list** using the team's **task template**. Do not include a **Scope** section in ticket/task templates. As a final step, the created tasks are **linked to the roadmap ticket** and the **workflow document is referenced in a comment** on the ticket (never edit the ticket description). If your pack defines cross-repo dependency tasks (for example a shared package whose version must be bumped in consumers), the task creator also creates those follow-ups. | **technical-task-creator** (pass: implementation plan, target board/list names, template name or link, **roadmap ticket ID**, workflow document ID) |
+
+## Flow summary
+
+1. Get the roadmap ticket and the user's initial thoughts (if any) → 2. **project-discovery** (opens with context, runs **grill-discovery** until the user confirms, writes the discovery `.md`; once approved, **one** tracker document with the outcome; do not update the ticket description) → 3. **requirements-doc-helper** (requirements added as a **new page** of that same document after validation) → 4. **technical-implementation-planner** adds the plan page → 5. **technical-task-creator** creates tasks from the plan in the right lists with the template, **links them to the roadmap ticket** and **posts a comment on the ticket** referencing the workflow document.
+
+## Tracker documents: location
+
+When creating a document in the tracker, do not add it to any list, folder, or space unless your pack says otherwise. Do **not** append the document link to the ticket description (it breaks the ticket's format). The document is referenced by its ID in the next steps; the user can link it manually if desired.
+
+## Document and page titles
+
+Subagents use these titles exactly, substituting the ticket ID for `<ticket_id>`:
+
+- **Document name:** `Discovery – <ticket_id>`
+- **Page 1:** `Discovery – <ticket_id>`
+- **Page 2:** `Requirements – <ticket_id>`
+- **Page 3:** `Implementation plan – <ticket_id>`
+
+Agents receive the `ticket_id` from the parent or the user and use it when creating the document or adding a page.
+
+## References in outcome documents
+
+In any workflow outcome document (discovery, requirements, implementation plan) or in content written to tracker pages, **do not reference another workflow document by local path**. Use the **tracker document URL** (or page URL). Once the document exists in the tracker, use that URL in any cross-reference written into the content.
+
+## Workflow drafts: base path (configurable)
+
+**Base path for workflow docs** (`<docs_root>`): where discovery `.md` files and past workflow docs are stored. All paths in this workflow are relative to it.
+
+- **Default:** the `docs/` folder of the current workspace. A pack or the user may set a different `<docs_root>`.
+- **Per-ticket folders:** `<docs_root>/<ticket_id>-Workflow/`.
+- **Discovery file:** `<docs_root>/<ticket_id>-Workflow/discovery-<ticket_id>.md`.
+
+When sharing this workflow, keep the structure (`<ticket_id>-Workflow/`, `discovery-<ticket_id>.md`) and let each user set their own `<docs_root>`.
+
+## Past workflow documents: context
+
+All workflow documents (discovery, requirements, implementation plan) for current and past tickets live under `<docs_root>`, in per-ticket subfolders. When running this workflow, add that directory as context so the agent can reuse structure and stay aligned with previous discoveries and plans.
+
+## Rule for all subagents (roadmap ticket)
+
+**No agent may remove or overwrite existing content on a roadmap ticket.** When a subagent updates the ticket, it may **only add** information: get the current content first and append; never replace the full description or other fields with only the new content. **Exception:** `project-discovery` must **not** update the ticket description (appending the doc link breaks the format).
+
+## project-discovery agent (step 2)
+
+When the discovery agent runs, it **must**:
+
+1. **Summarise context.** Give a brief summary of the context it already has (ticket summary, the user's initial thoughts, ticket ID, any passed notes).
+2. **Ask for specific context.** Ask the user for the context the agent thinks would help (product/analyst notes, constraints, decisions, mockups location), based on what is known and what is missing.
+3. **Grill.** Use the `grill-discovery` skill and follow it until the user confirms a shared understanding. That interview is the gap-finding and the validation. Do not write the discovery outcome during the grill.
+
+**Outcome:** (1) a **discovery outcome `.md` file** and (2) **once the user approves**, a **tracker document** with the same content.
+
+- **`.md` file:** folder `<docs_root>/<ticket_id>-Workflow`, filename `discovery-<ticket_id>.md`. Create the folder if it does not exist. Content: Problem; User journey; Desired outcomes; Summary of research and conversation.
+- **Tracker document (after approval):** created with **private** visibility and the exact discovery outcome content (page 1). This is the **single workflow document** for the ticket: step 3 adds Requirements as page 2, step 4 adds the Implementation plan as another page. The agent passes the **document ID** to the user (or parent) for step 3.
+
+## Delegation
+
+When the user is at a given step, delegate to the corresponding subagent and pass:
+
+- **Note:** the document ID is used for API calls and handoff; the "References in outcome documents" rule applies only to **content** written into files or tracker pages (no local paths in that content).
+- The ticket ID or link (when relevant).
+- The user's **initial thoughts** (from step 1), if any.
+- The **path to the discovery outcome file** (from step 2) when delegating to step 3: `<docs_root>/<ticket_id>-Workflow/discovery-<ticket_id>.md`.
+- The **tracker document ID of the discovery outcome** (from step 2) when delegating to step 3: `requirements-doc-helper` adds the requirements as a **new page** of that same document.
+- The document ID (from step 3 onward, for steps 4 and 5).
+- Any context the user provided (notes, mockups location, template name, target board/list names).
+- **Task template:** ticket/task templates must not include a Scope section; `technical-task-creator` uses Context (and optionally repository/area there) instead.

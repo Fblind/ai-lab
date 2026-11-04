@@ -1,0 +1,74 @@
+---
+description: "When adding a new feature or a complex bugfix inside existing high-complexity code, isolate it with the gated seam pattern."
+alwaysApply: false
+---
+
+# Gated seam for new work in complex code
+
+Do not add new behavior inside an already large, coupled function. Intercept the existing flow at one seam, run the new logic in a new module, and write the result back. Turning the flag off restores the legacy path.
+
+Use this for a new feature or a complex bugfix in legacy application or API code. Skip it when the module is already small and isolated.
+
+## Before coding
+
+Name the seam: the single place the existing flow can be intercepted. If more than one place could work, name them and pick one. A small, tested refactor (extract a variable, return a value) is allowed when it creates that one seam. Do not clean up the rest of the legacy file.
+
+## The seam
+
+1. **Gather inputs in the existing file.** Read the database, call services, and read surrounding state here. Pass a plain object into the new module.
+2. **Gate it.** Wrap the seam in the repo's feature flag. Off means the legacy path runs unchanged. Name the flag for the feature (see The flag).
+3. **Run a new module.** Put the logic in a new file named for the business outcome (`calculateLoyaltyDiscount`), not for where it sits (`processCartHelper`). Keep it close to a pure function: explicit inputs, predictable output. It does not reach global state, import a database or API client, or write unless that write is unavoidable and the reason is documented next to it.
+4. **Apply the output in the existing file.** The legacy code performs the mutation, the save, or the API call.
+
+When a fetch is only needed sometimes, the new module returns a boolean from the inputs already in hand. The existing file fetches only when that boolean is true.
+
+If the repo has `queries/` and `commands/`, reads and decisions stay in queries and writes stay in commands. The new module follows that split.
+
+## The new module
+
+- Name functions for the business outcome, as a read: `getHoldsToSave`, not an action such as `dropOrphanHolds`.
+- Put it in `<resource>/features/<feature-name>/` (the layout is configurable per pack), with a `queries/` and a `commands/` folder, each with an `index.js` that exports the functions. Its unit tests go in `features/<feature-name>/tests/unit/`.
+- Create `commands/` only when the feature has its own writes. When the save stays in the legacy file, there is nothing to put there.
+- Take one plain object (`{storedHolds, segments}`) and return the value. No database, API client, config, or global state.
+- The legacy file loads the data, calls the module, assigns the result, and saves.
+
+## The flag
+
+- Name it for the feature, and use the same name in every repository the feature touches (`seatHolds`, not `persistSeatHolds`). Different names for one feature cause confusion.
+- Use the repo's existing flag mechanism. For example, a `features` object in the service config that is on in every environment except production.
+- Pass config to the command as a dependency. Do not `require` the config file inside the command module. Read the flag as `this.config?.features?.<flag>`, so a caller that passes no config gets the legacy path.
+- Find every caller of the gated methods and pass the config from each one. A caller that does not pass it never follows the flag.
+
+## What to gate and what not to
+
+- Gate behavior only: what gets stored or returned because of a decision.
+- Do not gate read-only things: swagger definitions, schemas, handler docs, fixtures, and data mappings stay as they are. If the behavior does not change, it does not go behind the flag.
+- Do not gate unrelated bugfixes in the same change set, such as a security fix to a query filter.
+- State what flag-off means. When an ungated mapping makes flag-off differ from the old behavior (for example, a stored field now shows on reads), say so in the report.
+
+## Tests
+
+Unit-test the new module for its inputs and outputs. Add a few integration tests at the seam. Do not build an integration suite for the whole legacy file to cover the new lines.
+
+```js
+// features/calculateLoyaltyDiscount/queries.js
+export function calculateLoyaltyDiscount({ baseTotal, loyaltyStatus, itemCount, historyTotalSpent }) {
+  if (loyaltyStatus !== "GOLD" || itemCount <= 5 || historyTotalSpent <= 1000) {
+    return { newTotal: baseTotal, discountTag: null };
+  }
+  return { newTotal: baseTotal * 0.85, discountTag: "GOLD_BULK" };
+}
+
+// legacy checkout — the seam
+if (featureFlags.isEnabled("LOYALTY_DISCOUNT_V2", user.id)) {
+  const history = await db.orders.getHistory(user.id);
+  const result = calculateLoyaltyDiscount({
+    baseTotal: finalTotal,
+    loyaltyStatus: user.loyaltyStatus,
+    itemCount: cart.items.length,
+    historyTotalSpent: history.totalSpent
+  });
+  finalTotal = result.newTotal;
+  if (result.discountTag) cart.appliedDiscounts.push(result.discountTag);
+}
+```

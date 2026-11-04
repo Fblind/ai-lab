@@ -1,0 +1,21 @@
+---
+description: "When fixing fields lost on save (bookings, invoices, or similar), update the central model factory or shared helper, not each call site."
+alwaysApply: false
+---
+
+# Fix in central places, not at every call site
+
+When fixing issues where data is lost (e.g. fields missing after save, overwritten, or dropped), such as tax fields on bookings or invoices, **prefer updating only the central places** that are used across the codebase.
+
+## Principle
+
+- **Update the model factory and the shared creation helper** (for example `Booking` and `createInvoiceLine`, or whatever the equivalents are) with the missing or sensitive fields. That way the fix applies everywhere those are used.
+- **Do not** add special-case logic at each call site (e.g. in a change service, cancellations, or round-trip paths). Centralising the fix in the model and shared helpers is minimal, lands in specific places used across the code, and is **always better** for future discoveries and implementations.
+
+## Why
+
+- One change in the factory or the creation helper fixes all paths that load and save the entity.
+- Call sites stay simple and do not need to know about every field that must be preserved.
+- Fewer places to maintain and less risk of missing a path when requirements evolve.
+
+Keep this in mind for future discoveries and implementations: **minimal change in central, shared places (models, shared helpers) over logic scattered at call sites.**

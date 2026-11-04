@@ -1,0 +1,73 @@
+---
+description: "When writing or changing code in a service that has queries/ and commands/ folders, keep reads and decisions in queries and writes in commands."
+alwaysApply: false
+---
+
+# CQRS-style: Queries vs Commands
+
+Follow a **CQRS-like pattern** as much as the codebase allows: separate **queries** (read/decision logic) from **commands** (write/action logic).
+
+## Where it applies
+
+- Any service that already has a `<resource>/queries/` and `<resource>/commands/` structure (the layout is configurable per pack; see `examples/company-pack/`).
+- If the repo has no such structure, do not introduce it as part of an unrelated change.
+
+## Queries
+
+- **Purpose:** answer questions, look up data, **decide** things (e.g. “does this payment use the async flow?”, “which payload matches this payment?”).
+- **Location:** `<resource>/queries/` (e.g. `payment-queries.js`, `queries/index.js`).
+- **Characteristics:**
+  - Pure or mostly pure: same inputs → same outputs.
+  - No direct persistence or side effects; they **return** values or decisions.
+  - Hold constants and rules that **classify or select** (e.g. the list of valid provider + method combinations for a flow).
+
+## Commands
+
+- **Purpose:** perform actions, change state, orchestrate (e.g. create a refund, update an order).
+- **Location:** `<resource>/commands/` (e.g. `commands/index.js`, `payment-commands.js`).
+- **Characteristics:**
+  - Call **queries** when they need a decision or lookup.
+  - Perform writes, call external services, and coordinate steps.
+
+## Rule of thumb
+
+- **“Is this a question or a decision?”** → put it in a **query** (or a query module).
+- **“Is this doing something or changing state?”** → put it in a **command**, and have the command **use** the query when it needs a decision.
+
+## Example (refunds)
+
+- **Query** (`payment-queries.js`): `usesAsyncRefundFlow(payment)`, `ASYNC_REFUND_COMBINATIONS` — decides whether a payment is refunded through the async flow.
+- **Command** (`commands/index.js`): `getRefundMethod(payments)` uses `PaymentQueries.usesAsyncRefundFlow` to choose which refund method to run; the command then executes that method.
+
+When adding new behaviour that is **only a decision or lookup**, add or extend a query and have commands call it instead of inlining the logic in the command.
+
+## Reads are queries, even inside a command
+
+- Every read from the DB or another API is a query, including the re-read a command does after its write. A command file does not call `findOne`, `findById`, `find` or an API client GET.
+- Before writing a new read, look in the resource's `queries/` (and the parent resource's, for a `features/` module) for one that already exists, e.g. `getEventByName`, `getAccountById`.
+
+## Commands receive loaded entities
+
+- The handler loads every entity the command needs, through queries, and fails with `<ENTITY>_NOT_FOUND` when one is missing.
+- The command takes those objects (`{account, event, data}`), not ids it would have to look up. Tests can then pass plain objects instead of seeding the DB for every input.
+- Take scope values from the loaded entity (`event.accountId`) rather than passing the same id again as a separate parameter.
+
+## Imports
+
+Import commands and queries as namespaces and call through them, so each call shows which side it is on:
+
+```js
+const Commands = require("../features/seat-holds/commands/index.js");
+const Queries = require("../queries/index.js");
+
+await Commands.addSeatHold({dao, account, event, data});
+const {rows, error} = Queries.seatHoldRowsToAdd({...});
+```
+
+Do not destructure (`const {addSeatHold} = require(...)`). When one file needs two query modules, give each a name that says where it comes from (`EventQueries`, `SeatHoldQueries`).
+
+## Writes to arrays other requests can change
+
+- Do not read the document, change the array in memory and write it back with `$set`: a concurrent request's change is lost.
+- Use one atomic update: `$push` with `$each`, with a filter that re-checks the rule at write time (e.g. `{arr: {$not: {$elemMatch: {$or: pairs}}}}`), or `$pull` by id with the id in the filter.
+- Treat a matched count of 0 (`result.n`) as the conflict or not-found error. Then return the stored state through a query.
