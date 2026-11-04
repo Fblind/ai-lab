@@ -1,0 +1,22 @@
+---
+description: Acme Tickets shared packages that need bump follow-up tasks in consumer repos. Use when a task is created or planned for a shared package such as acme-ui-kit.
+alwaysApply: false
+---
+
+# Shared packages and bump follow-ups
+
+Consumers only pick up a shared package change after the pinned tag in their `package.json` is bumped. `technical-task-creator` creates one follow-up task per consumer for **every** task in a shared package's list.
+
+| Package (list) | Consumer repos | Specifier format |
+|---|---|---|
+| `acme-ui-kit` | `acme-web-app` | `"acme-ui-kit": "github:example-org/acme-ui-kit#vX.Y.Z"` |
+| `acme-ui-kit` | `acme-reports-app` | `"acme-ui-kit": "git+ssh://git@github.com/example-org/acme-ui-kit.git#vX.Y.Z"` |
+
+## Follow-up tasks
+
+- Title: `Bump acme-ui-kit to the published version` (no repo name in the title).
+- Lists: `acme-web-app` and `acme-reports-app`, one task each.
+- Dependency: each bump task **waits on** the `acme-ui-kit` task.
+- The `acme-ui-kit` task's acceptance criteria include "publish a new tagged version".
+- `package.json` links: `https://github.com/example-org/acme-web-app/blob/main/package.json` and `https://github.com/example-org/acme-reports-app/blob/main/package.json`.
+- Skip the follow-ups only if the parent task is skipped, or if the plan already contains equivalent bump tasks (then just set the dependency).

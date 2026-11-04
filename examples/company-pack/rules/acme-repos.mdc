@@ -1,0 +1,45 @@
+---
+description: Acme Tickets repositories, folder layout and test commands. Use when working in any acme-* repo, planning changes across repos, or deciding how to verify a change.
+alwaysApply: false
+---
+
+# Acme Tickets repositories
+
+Fictional company. Replace with your own repos.
+
+## Repositories
+
+| Repo | What it is | Layout | Test command | TDD? |
+|---|---|---|---|---|
+| `acme-api-orders` | Orders, refunds, seat holds (REST API) | `resources/<feature>/{queries,commands,handlers,models}/` | `npm test` (unit), `npm run test:coverage` | yes |
+| `acme-api-events` | Events, venues, schedules (REST API) | same as above | `npm test`, `npm run test:coverage` | yes |
+| `acme-api-payments` | Payment provider integration (REST API) | same as above | `npm test`, `npm run test:coverage` | yes |
+| `acme-web-app` | Box-office web app (server-rendered + Vue) | `app/modules/<feature>/{queries,commands}/` | `npm run test:unit` | no, write tests after, same task |
+| `acme-reports-app` | Reporting front end | `app/modules/<feature>/` | `npm run test:unit` | no |
+| `acme-ui-kit` | Shared UI components (published as a git tag) | `src/components/` | `npm test` | yes |
+| `acme-db-translations` | Translation keys and their migrations | `migrations/` | none; migrations are not run as tests | n/a |
+
+The repos listed as "no" under TDD are the ones in `skipRedGreen` of `kit.config.json`. The one with no tests is in `noCoverageRepos`.
+
+## Pre-commit commands
+
+Run in the repo you changed, in this order: `npm run lint`, then the test command above. Fix failures before committing.
+
+## Context sources for discovery and summaries
+
+- Product docs: https://docs.acme-tickets.example/product
+- Technical docs (APIs, webhooks): https://docs.acme-tickets.example/api
+- Developer wiki: https://docs.acme-tickets.example/wiki
+- Sandbox for visual checks: https://sandbox.acme-tickets.example (ask for credentials; never write them down)
+
+## Branches
+
+The integration branch is `main`. Feature branches are named `<ticket-id>-<short-title>`.
+
+## Local services (for manual API checks)
+
+| Service | Port |
+|---|---|
+| `acme-api-orders` | 3010 |
+| `acme-api-events` | 3011 |
+| `acme-api-payments` | 3012 |

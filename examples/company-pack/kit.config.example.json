@@ -1,0 +1,7 @@
+{
+  "docsRoot": "docs",
+  "secondBrain": "~/second-brain",
+  "ticketPattern": "ACME-\\d+",
+  "skipRedGreen": ["acme-web-app", "acme-reports-app"],
+  "noCoverageRepos": ["acme-db-translations"]
+}

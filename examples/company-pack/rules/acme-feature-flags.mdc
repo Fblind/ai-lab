@@ -1,0 +1,15 @@
+---
+description: How Acme Tickets names and reads feature flags. Use when adding a gated seam, a flag, or when a new feature or complex bugfix goes inside existing high-complexity code.
+alwaysApply: false
+---
+
+# Feature flags at Acme Tickets
+
+The generic `gated-seam` rule says "gate the new call with the repo's feature flag". At Acme Tickets that means:
+
+- **Name:** the feature name in kebab-case, the same in every repo the feature touches. Example: `seat-hold-expiry`.
+- **Config:** flags live in `config/feature-flags.json` of each repo as `{ "<flag-name>": false }`. The default is `false` (old behaviour).
+- **Read:** through `featureFlags.isEnabled("<flag-name>", { accountId })` from the shared API client. Never read the JSON directly.
+- **Scope:** per account. A flag that is on for one account does not change another.
+- **Tests:** one test with the flag off (legacy behaviour unchanged) and one with it on (new behaviour). Stub the flag service, not the module under test.
+- **Cleanup:** when the flag has been on everywhere for a release, open a ticket to remove the flag and the legacy path.

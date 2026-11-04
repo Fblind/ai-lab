@@ -1,0 +1,29 @@
+---
+description: Acme Tickets tracker conventions (ClickUp-like). Use when reading or creating tickets, workflow documents, tasks, links or comments, or when mapping a ticket to a repository.
+alwaysApply: false
+---
+
+# Tracker conventions at Acme Tickets
+
+The core kit is tracker-agnostic. Acme uses a ClickUp-like tracker. The tool names for each operation are in `tracker-mapping.md` next to this rule's pack.
+
+## Spaces and lists
+
+- **Roadmap space:** product tickets (`ACME-123` style IDs). Descriptions follow a fixed format, so agents **never edit them**. Add a comment or a link instead.
+- **Engineering space:** one list per repository, named exactly like the repo (`acme-api-orders`). The list name is the repo. If the open repo has another name, warn before doing anything.
+- Tasks created by `technical-task-creator` are assigned to the user, tagged from the existing tags of the space, and **linked** (not nested) to the roadmap ticket.
+
+## Documents
+
+- One workflow document per roadmap ticket, private to the user, created at workspace level (not on a list).
+- Page titles: `Discovery – <ticket_id>`, `Requirements – <ticket_id>`, `Implementation plan – <ticket_id>`, `Engineering tasks – <ticket_id>`, `Feature summary – <ticket_id>`.
+- Reference documents by URL in tickets and specs, never by local path.
+
+## Commits and branches
+
+- Ticket pattern: `ACME-\d+`. Commit subjects start with the ticket: `ACME-123 Add refund window check`.
+- Branches: `ACME-123-refund-window`.
+
+## Definition of Done
+
+https://docs.acme-tickets.example/wiki/definition-of-done. Task descriptions end with a line linking to it.
