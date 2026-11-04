@@ -1,0 +1,36 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Leak check (forbidden names, secrets, broken links)
+        run: node scripts/leak-check.mjs
+      - name: Syntax check scripts
+        run: for f in scripts/*.mjs; do node --check "$f"; done
+      - name: Sync script generates CLAUDE.md and .cursorrules
+        run: |
+          node scripts/sync-agent-rules.mjs
+          node scripts/sync-agent-rules.mjs --check
+      - name: Install dry-run (Cursor, Claude Code, with example pack)
+        run: |
+          tmp="$(mktemp -d)"
+          node scripts/install.mjs --target cursor --home "$tmp/cursor" --pack examples/company-pack --dry-run
+          node scripts/install.mjs --target claude --home "$tmp/claude" --pack examples/company-pack --dry-run
+      - name: Real install into a temp home is idempotent
+        run: |
+          tmp="$(mktemp -d)"
+          node scripts/install.mjs --target cursor --home "$tmp/cursor" --pack examples/company-pack
+          node scripts/install.mjs --target cursor --home "$tmp/cursor" --pack examples/company-pack

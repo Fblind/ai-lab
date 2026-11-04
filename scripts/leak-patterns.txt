@@ -1,0 +1,38 @@
+# Patterns scanned for by scripts/leak-check.mjs. This file is excluded from the scan.
+# Format:  <scope>: <regex>   (case-insensitive)
+#   all:   forbidden anywhere in the repository
+#   core:  forbidden everywhere except examples/ (where tracker/tool names are the point)
+# Add a pattern whenever you discover something that must never be published.
+
+# Former employer and product names
+all: betterez
+all: btrz
+all: terra[ _-]?mobility
+all: getnet
+all: prisma
+
+# Personal paths and handles
+all: /home/[a-z0-9_.-]+/
+all: /Users/[a-z0-9_.-]+/
+all: \bfack\b
+all: \[MR\]
+
+# Internal tooling identifiers
+all: internal_auth_token
+all: 1221747
+all: \bCU-[0-9a-z]{6,}\b
+all: \b86[a-z0-9]{7}\b
+all: \b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b
+
+# Secrets
+all: ghp_[A-Za-z0-9]{20,}
+all: github_pat_[A-Za-z0-9_]{20,}
+all: sk-[A-Za-z0-9]{20,}
+all: xox[abpr]-[A-Za-z0-9-]{10,}
+all: AKIA[0-9A-Z]{16}
+all: -----BEGIN [A-Z ]*PRIVATE KEY-----
+all: (api[_-]?key|secret|password|token)["']?\s*[:=]\s*["'][A-Za-z0-9/+_-]{16,}["']
+
+# Tool names that belong in the example pack only
+core: clickup
+core: postman
