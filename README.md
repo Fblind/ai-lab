@@ -2,6 +2,8 @@
 
 My AI engineering lab: a portable set of **rules, skills and subagents** that make an AI coding assistant work the way a careful team does, following a spec → TDD → review workflow: ask first, write a spec, split it into tasks, test first, review, commit small, and write down what was learned.
 
+Kit and skills are a work in progress, so things can change and you can find duplicated stuff.
+
 It works with **Cursor** and **Claude Code**. The kit is generic; everything specific to one company (repos, test commands, tracker, API client, feature flags) lives in a separate **company pack**. A fictional one is in [`examples/company-pack/`](examples/company-pack/README.md).
 
 ## The workflow
