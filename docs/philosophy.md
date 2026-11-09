@@ -5,7 +5,7 @@ Why this kit looks the way it does. Short version: AI coding agents are fast and
 ## The loop
 
 ```
-grill-discovery  →  spec  →  one task  →  TDD  →  review  →  commit  →  lessons
+grill-discovery  →  spec  →  one task  →  TDD  →  review  →  demo  →  commit  →  lessons
 ```
 
 1. **Grill before you spec.** The cheapest bug is the misunderstanding you remove in a conversation. `grill-discovery` interviews you one frontier of questions at a time until the problem, the actors and the outcomes are shared. Only then is a spec worth writing.
@@ -13,8 +13,9 @@ grill-discovery  →  spec  →  one task  →  TDD  →  review  →  commit  �
 3. **One task per context.** `execute-spec-task` implements exactly Tn. Fresh context per task keeps the agent from drifting into unrelated edits.
 4. **Red, then green.** `tdd` writes the failing test first, watches it fail for the right reason, then makes it pass. Stubs for external HTTP are the only test double. Tests that repeat existing assertions are noise (`no-redundant-tests`).
 5. **Review with a second pair of eyes.** `code-reviewer` is a light read-only pass. `strict-code-reviewer` adds backward-compatibility, test-vulnerability, performance and security checks plus a coverage gate on the touched lines. `review-spec-code` checks the diff against the spec.
-6. **Commit the why.** `commit-spec-change` writes a conventional commit that explains the reason, not just the diff.
-7. **Learn.** `session-lessons` turns what surprised you into a short note in a "second brain" and, when a skill or rule caused the problem, proposes a change to that skill or rule.
+6. **Show what a person can see.** `record-demo` turns the acceptance criteria into one scene file. A dry run proves the clicks. One headless recording produces the video and a caption script. Login, URLs and fixtures stay in that file. The kit does not know any one product.
+7. **Commit the why.** `commit-spec-change` writes a conventional commit that explains the reason, not just the diff.
+8. **Learn.** `session-lessons` turns what surprised you into a short note in a "second brain" and, when a skill or rule caused the problem, proposes a change to that skill or rule.
 
 ## Rules of thumb behind the rules
 

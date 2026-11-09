@@ -19,7 +19,9 @@ jobs:
       - name: Leak check (forbidden names, secrets, broken links)
         run: node scripts/leak-check.mjs
       - name: Syntax check scripts
-        run: for f in scripts/*.mjs; do node --check "$f"; done
+        run: |
+          for f in scripts/*.mjs core/skills/*/scripts/*.mjs; do node --check "$f"; done
+          node core/skills/record-demo/scripts/record.mjs core/skills/record-demo/examples/minimal.scenes.mjs --plan
       - name: Sync script generates CLAUDE.md and .cursorrules
         run: |
           node scripts/sync-agent-rules.mjs

@@ -72,5 +72,6 @@ Checks to run after the last task, before the final commit.
 - [ ] The full test command of the repo passes.
 - [ ] Coverage on the lines this change touched is above the repo's threshold.
 - [ ] The manual check from the requirements passes (request, response, status code).
+- [ ] If a criterion is visible in a UI, `record-demo` covers it (scene file, dry run, one video). Backend-only criteria point at the test instead.
 - [ ] The API spec and translation keys (if any) are updated.
 - [ ] Lessons captured with `session-lessons`.

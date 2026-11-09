@@ -15,7 +15,8 @@ flowchart LR
   C --> D[tdd<br/>red, green, refactor]
   D --> E[review<br/>review-spec-code / code-reviewer /<br/>strict-code-reviewer / pr-code-reviewer]
   E -->|findings| D
-  E --> F[commit-spec-change<br/>small commit tied to the task]
+  E --> H[record-demo<br/>video for visible criteria, test otherwise]
+  H --> F[commit-spec-change<br/>small commit tied to the task]
   F --> G[session-lessons<br/>what to do differently next time]
   G -.->|feeds| A
 ```
@@ -27,6 +28,7 @@ flowchart LR
 | Plan | `technical-implementation-planner`, `technical-task-creator` | Maps the spec to repositories and creates engineering tasks, including shared-package bump follow-ups. |
 | Build | `execute-spec-task`, `implement-ticket`, `tdd` | One task per run. Red first, minimal green, refactor. Manual check at the end. |
 | Review | `review-spec-code`, `code-reviewer`, `strict-code-reviewer`, `pr-code-reviewer` | Reviews against the spec and the standards, from friendly to merciless. |
+| Show | `record-demo` | One scene file per feature. A dry run proves each visible criterion, then one headless video and a caption script. A criterion with no UI points at its test. |
 | Ship | `commit-spec-change` | Commits a spec change or a task with a clear message. |
 | Learn | `session-lessons` | Writes a short lesson file so the next session starts smarter. |
 
@@ -38,7 +40,7 @@ Supporting rules: gated seam (new behaviour behind a flag in complex code), CQRS
 core/
   agents/   7 subagents (reviewers, planner, task creator, ...)
   rules/    10 rules (.mdc)
-  skills/   14 skills (SKILL.md folders)
+  skills/   15 skills (SKILL.md folders)
 docs/
   spec-template.md
   philosophy.md
